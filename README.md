@@ -1,2 +1,2 @@
 # terbium02
-BUILD WITH $ make
+My work in progress 6502 emulator, written in C.
