@@ -19,16 +19,3 @@ void initFile(void) {
 
     // we're going to need to write this to memory, at some point, but I'm not gonna add this yet because there's probably some specific place it needs to be. Writing to PROGRAM_MEMORY.
 }
-
-// we can use fseek for something like, going to a specfic location in memory
-/*
-uint8_t readByteFromFile(struct CPU *c) {
-    int x = PROGRAM[c->PROGRAM_COUNTER];
-    c->PROGRAM_COUNTER++;
-    return x;
-    // refer to 20, will need to delete
-}
-*/
-
-
-
