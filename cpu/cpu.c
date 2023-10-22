@@ -298,6 +298,178 @@ void FDC(void) {
             CPU->IRY++;
             break;
 
+       // ADC
+
+        case 0x69:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[imm()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0x65:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[zpg()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0x75:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[zpgX()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0x6D:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[abso()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+            // never gonna do it without the fez on
+        case 0x7D:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[absx()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0x79:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[absy()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0x61:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[Xind()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0x71:
+            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[indY()];
+            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+
+        // SBC
+        
+        case 0xE9:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[imm()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xE5:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[zpg()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xF5:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[zpgX()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xED:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[abso()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xFD:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[absx()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xF9:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[absy()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xE1:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[Xind()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+        case 0xF1:
+            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[indY()];
+            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+
+        // AND
+
+        case 0x29:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[imm()];
+            break;
+        case 0x25:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[zpg()];
+            break;
+        case 0x35:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[zpgX()];
+            break;
+        case 0x2D:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[abso()];
+            break;
+        case 0x3D:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[absx()];
+            break;
+        case 0x39:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[absy()];
+            break;
+        case 0x21:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[Xind()];
+            break;
+        case 0x31:
+            CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[indY()];
+            break;
+
+        // EOR
+
+        case 0x49:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[imm()];
+            break;
+        case 0x45:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[zpg()];
+            break;
+        case 0x55:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[zpgX()];
+            break;
+        case 0x4D:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[abso()];
+            break;
+        case 0x5D:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[absx()];
+            break;
+        case 0x59:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[absy()];
+            break;
+        case 0x41:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[Xind()];
+            break;
+        case 0x51:
+            CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[indY()];
+            break;
+
+        // ORA    
+
+        case 0x09:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[imm()];
+            break;
+        case 0x05:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[zpg()];
+            break;
+        case 0x15:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[zpgX()];
+            break;
+        case 0x0D:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[abso()];
+            break;
+        case 0x1D:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[absx()];
+            break;
+        case 0x19:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[absy()];
+            break;
+        case 0x01:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[Xind()];
+            break;
+        case 0x11:
+            CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[indY()];
+            break;
+
+
+
+
+
 
 
         default:

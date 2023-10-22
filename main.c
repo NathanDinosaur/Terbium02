@@ -6,10 +6,10 @@
 int main(void) {
     //initFile(); // segmentation fault 
     
-    CPU->IRX = 10;
-    MEMORY->PROGRAM_MEM[0] = 0xE8;
+    CPU->ACCUMULATOR = 10;
+    CPU->FLAGS.CARRY_FLAG = 1;
+    MEMORY->PROGRAM_MEM[0] = 0xE9;
     MEMORY->PROGRAM_MEM[1] = 5;
-    MEMORY->PROGRAM_MEM[5] = 15;
 
 
     FDC();
