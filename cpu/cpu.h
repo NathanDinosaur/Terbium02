@@ -69,4 +69,9 @@ void PLA(void);
 
 void PLP(void);
 
+// CMP
+
+void comp(uint8_t r, uint8_t o); 
+
+
 #endif
