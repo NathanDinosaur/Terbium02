@@ -12,7 +12,7 @@ int main(void) {
     MEMORY->PROGRAM_MEM[1] = 5;
 
 
-    printf("%d", 13);
+    printf("%s", "Testing how to use Github, lol");
     
     FDC();
     printcpuinfo();
