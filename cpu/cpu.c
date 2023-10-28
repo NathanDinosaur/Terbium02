@@ -622,6 +622,102 @@ void FDC(void) {
             comp(MEMORY->PROGRAM_MEM[indY()], CPU->ACCUMULATOR);
             break;
 
+        // CPX
+
+        case 0xE0:
+            comp(MEMORY->PROGRAM_MEM[imm()], CPU->IRX);
+            break;
+        case 0xE4:
+            comp(MEMORY->PROGRAM_MEM[zpg()], CPU->IRX);
+            break;
+        case 0xEC:
+            comp(MEMORY->PROGRAM_MEM[abso()], CPU->IRX);
+            break;
+        
+        // CPY 
+
+        case 0xC0:
+            comp(MEMORY->PROGRAM_MEM[imm()], CPU->IRY);
+            break;
+        case 0xC4:
+            comp(MEMORY->PROGRAM_MEM[zpg()], CPU->IRY);
+            break;
+        case 0xCC:
+            comp(MEMORY->PROGRAM_MEM[abso()], CPU->IRY);
+            break;
+
+        // BCC
+        case 0x90:
+            if(!CPU->FLAGS.CARRY_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        // BCS
+        
+        case 0xB0:
+            if(CPU->FLAGS.CARRY_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        // BEQ
+        
+        case 0xF0:
+             if(CPU->FLAGS.ZERO_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        //  BMI
+
+        case 0x30:
+             if(CPU->FLAGS.NEGATIVE_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        // BNE
+
+        case 0xD0:
+            if(!CPU->FLAGS.ZERO_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        // BPL
+
+        case 0x10:
+             if(!CPU->FLAGS.NEGATIVE_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        // BVC
+
+        case 0x50:
+             if(!CPU->FLAGS.OVERFLOW_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+
+        // BVS
+
+        case 0x70:
+             if(CPU->FLAGS.OVERFLOW_FLAG) {
+                CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
+            }
+            break;
+        
+        // JMP
+
+        case 0x4C:
+            CPU->PROGRAM_COUNTER = abso();
+            break;
+        case 0x6C:
+            //CPU->PROGRAM_COUNTER =
+
+
 
         default:
             puts("\nERROR! Instruction not valid");
