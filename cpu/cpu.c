@@ -531,10 +531,12 @@ void FDC(void) {
        case 0x2E:
             CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[abso()] >> 7;
             MEMORY->PROGRAM_MEM[abso()] >>= 1;
+            MEMORY->PROGRAM_MEM[abso()] |= CPU->FLAGS.CARRY_FLAG;
             break;
        case 0x3E:
             CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[absx()] >> 7;
             MEMORY->PROGRAM_MEM[absx()] >>= 1;
+            MEMORY->PROGRAM_MEM[absx()] |= CPU->FLAGS.CARRY_FLAG;
             break;
 
        // ROR
@@ -542,24 +544,57 @@ void FDC(void) {
        case 0x6A:
             CPU->FLAGS.CARRY_FLAG = CPU->ACCUMULATOR << 7;
             CPU->ACCUMULATOR <<= 1;
+            CPU->ACCUMULATOR |= CPU->FLAGS.CARRY_FLAG >> 7;
             break;
        case 0x66:
             CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
             MEMORY->PROGRAM_MEM[zpg()] <<= 1;
+            MEMORY->PROGRAM_MEM[zpg()] |= CPU->FLAGS.CARRY_FLAG >> 7;
             break;
        case 0x76:
             CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
             MEMORY->PROGRAM_MEM[zpgX()] <<= 1;
+            MEMORY->PROGRAM_MEM[zpgX()] |= CPU->FLAGS.CARRY_FLAG >> 7;
             break;
        case 0x6E:
             CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
             MEMORY->PROGRAM_MEM[abso()] <<= 1;
+            MEMORY->PROGRAM_MEM[abso()] |= CPU->FLAGS.CARRY_FLAG >> 7;
             break;
        case 0x7E:
             CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
             MEMORY->PROGRAM_MEM[absx()] <<= 1;
+            MEMORY->PROGRAM_MEM[absx()] |= CPU->FLAGS.CARRY_FLAG >> 7;
             break;
-   
+
+
+       // CLEAR FLAGS (CLC, CLD, CLI , CLV)
+
+       case 0x18:
+            CPU->FLAGS.CARRY_FLAG = 0;
+            break;
+       case 0xD8:
+            CPU->FLAGS.DECIMAL_FLAG = 0;
+            break;
+       case 0x58:
+            CPU->FLAGS.INTERRUPT_FLAG = 0;
+            break;
+       case 0xB8:
+            CPU->FLAGS.OVERFLOW_FLAG = 0;
+            break;
+
+       // SET FLAGS (SEC, SED, SEI)
+
+       case 0x38:
+            CPU->FLAGS.CARRY_FLAG = 1;
+            break;
+       case 0xF8:
+            CPU->FLAGS.DECIMAL_FLAG = 1;
+            break;
+       case 0x78:
+            CPU->FLAGS.INTERRUPT_FLAG = 1;
+            break;
+
        // CMP
        
        case 0xc9:
