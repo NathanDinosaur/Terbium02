@@ -12,6 +12,8 @@ int main(void) {
     MEMORY->PROGRAM_MEM[1] = 5;
 
 
+    printf("%d", 13);
+    
     FDC();
     printcpuinfo();
     printf("%d\n", CPU->ACCUMULATOR); 
