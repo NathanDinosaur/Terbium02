@@ -3,14 +3,19 @@
 #include "cpu.h"
 #include "../memory/memory.h"
 
-int LastInstruction = 0;
- 
+// TODO:
+// Go through every instruction, iterate the program counter for their
+// respective amounts for that instruction. Finish the flag checks and also
+// add them for their respective instructions as well- then figure out cycles
+// for each instruction. We need that for timing.
+
 #define READ16(x) *(uint16_t*) (&x)
 
 struct CPU_t *CPU = &(struct CPU_t) {0};
 
 // PRINTING CPU INFORMATION
 
+int LastInstruction = 0;
 void printcpuinfo(void) {
     printf("%x PC| %x SP| %x A| %x X|%x Y| 0x%x LI|\n",
             CPU->PROGRAM_COUNTER, CPU->STACK_PTR, CPU->ACCUMULATOR, CPU->IRX, CPU->IRY, LastInstruction);
@@ -284,7 +289,6 @@ void FDC(void) {
         case 0xFE:
             MEMORY->PROGRAM_MEM[absx()]++;
             break;
-
 
         // INX
 
@@ -716,15 +720,13 @@ void FDC(void) {
             break;
         case 0x6C:
             //CPU->PROGRAM_COUNTER =
-
-
+            break;
 
         default:
             puts("\nERROR! Instruction not valid");
             break;
     }
 }
-
 
 void comp(uint8_t r, uint8_t o) {
     uint8_t sr = r - o;
