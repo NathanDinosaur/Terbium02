@@ -62,7 +62,6 @@ int indY(void) {
     // This works! Don't fuck with it
 }
 
-
 // FLAG FUNCTIONS
 
 void N_FLAGCHECK(int check) {
@@ -76,7 +75,6 @@ void Z_FLAGCHECK(int check) {
         CPU->FLAGS.ZERO_FLAG = 1;
     }
 }
-
 
 // FETCH DECODE EXECUTE
 
@@ -738,6 +736,7 @@ void FDC(void) {
     }
 }
 
+// for comparing, with the branch instructions
 void comp(uint8_t r, uint8_t o) {
     uint8_t sr = r - o;
     if(r < o) {
