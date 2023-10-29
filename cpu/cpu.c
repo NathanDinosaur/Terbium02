@@ -651,6 +651,7 @@ void FDC(void) {
             break;
 
         // BCC
+    
         case 0x90:
             if(!CPU->FLAGS.CARRY_FLAG) {
                 CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
@@ -668,7 +669,7 @@ void FDC(void) {
         // BEQ
         
         case 0xF0:
-             if(CPU->FLAGS.ZERO_FLAG) {
+            if(CPU->FLAGS.ZERO_FLAG) {
                 CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
             }
             break;
@@ -676,7 +677,7 @@ void FDC(void) {
         //  BMI
 
         case 0x30:
-             if(CPU->FLAGS.NEGATIVE_FLAG) {
+            if(CPU->FLAGS.NEGATIVE_FLAG) {
                 CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
             }
             break;
@@ -692,7 +693,7 @@ void FDC(void) {
         // BPL
 
         case 0x10:
-             if(!CPU->FLAGS.NEGATIVE_FLAG) {
+            if(!CPU->FLAGS.NEGATIVE_FLAG) {
                 CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
             }
             break;
@@ -700,7 +701,7 @@ void FDC(void) {
         // BVC
 
         case 0x50:
-             if(!CPU->FLAGS.OVERFLOW_FLAG) {
+            if(!CPU->FLAGS.OVERFLOW_FLAG) {
                 CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
             }
             break;
@@ -708,7 +709,7 @@ void FDC(void) {
         // BVS
 
         case 0x70:
-             if(CPU->FLAGS.OVERFLOW_FLAG) {
+            if(CPU->FLAGS.OVERFLOW_FLAG) {
                 CPU->PROGRAM_COUNTER += (int) MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 1];
             }
             break;
