@@ -12,6 +12,7 @@
 #define READ16(x) *(uint16_t*) (&x)
 
 struct CPU_t *CPU = &(struct CPU_t) {0};
+int STOP = 0; // if program should stop
 
 // PRINTING CPU INFORMATION
 
@@ -720,9 +721,17 @@ void FDC(void) {
             CPU->PROGRAM_COUNTER = abso();
             break;
         case 0x6C:
-            //CPU->PROGRAM_COUNTER =
+            CPU->PROGRAM_COUNTER = MEMORY->PROGRAM_MEM[abso()];
             break;
 
+        // BRK
+
+        case 0x00:
+             MEMORY->STACK[CPU->STACK_PTR] = CPU->PROGRAM_COUNTER + 2;
+             CPU->STACK_PTR--;
+             puts("BREAK CALLED!\n");
+             STOP = 1;
+             break;
         default:
             puts("\nERROR! Instruction not valid");
             break;

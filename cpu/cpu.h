@@ -28,8 +28,7 @@ struct CPU_t {
     };
 };
 
-
-
+extern int STOP;
 
 extern struct CPU_t *CPU; // using extern with structs in C is awkward, so instead
                           // this is a pointer *to* a struct, and we extern this
