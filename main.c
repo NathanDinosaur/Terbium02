@@ -11,6 +11,8 @@ int main(void) {
     MEMORY->PROGRAM_MEM[0] = 0x0E;
     MEMORY->PROGRAM_MEM[1] = 5;
 
+    printf("%s\n", "Branch test");
+
     while(!STOP) {
         FDC();
         printcpuinfo();
