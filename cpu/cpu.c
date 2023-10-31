@@ -722,6 +722,11 @@ void FDC(void) {
             CPU->PROGRAM_COUNTER = MEMORY->PROGRAM_MEM[abso()];
             break;
 
+        // JSR
+
+        case 0x20:
+
+
         // BRK
 
         case 0x00:
