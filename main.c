@@ -5,7 +5,8 @@
 
 int main(void) {
     //initFile(); // segmentation fault 
-    
+    CPU->STACK_PTR = 255;
+
     CPU->ACCUMULATOR = 10;
     CPU->FLAGS.CARRY_FLAG = 1;
     MEMORY->PROGRAM_MEM[0] = 0x0E;
