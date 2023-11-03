@@ -66,7 +66,8 @@ int indY(void) {
 // FLAG FUNCTIONS
 
 void N_FLAGCHECK(int check) {
-    CPU->FLAGS.NEGATIVE_FLAG = (7 >> check);
+    // WE PUT THE NUMBER WE WANT SHIFTED ON THE LEFT. NOT THE RIGHT
+    CPU->FLAGS.NEGATIVE_FLAG = (check >> 7);
     // we don't actually need an if statement here, this works, and won't
     // actually break.
 }
