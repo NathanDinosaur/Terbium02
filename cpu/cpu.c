@@ -85,66 +85,122 @@ void Z_FLAGCHECK(int check) {
 void FDC(void) {
     LastInstruction = MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER];
     switch(MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER]) {
-        // TRANSFER INSTRUCTIONS
+        
         // LDA
 
         case 0xA9:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[imm()];
-            CPU->PROGRAM_COUNTER += 3;
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
         case 0xA5:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[zpg()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
         case 0xB5:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[zpgX()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
         case 0xAD:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[abso()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
         case 0xBD:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[absx()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
         case 0xB9:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[absy()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            break;
+        case 0xA1:
+            CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[Xind()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
         case 0xB1:
             CPU->ACCUMULATOR = MEMORY->PROGRAM_MEM[indY()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
 
         // LDX
 
         case 0xA2:
             CPU->IRX = MEMORY->PROGRAM_MEM[imm()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
         case 0xA6:
             CPU->IRX = MEMORY->PROGRAM_MEM[zpg()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
         case 0xB6:
             CPU->IRX = MEMORY->PROGRAM_MEM[zpgY()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
         case 0xAE:
             CPU->IRX = MEMORY->PROGRAM_MEM[abso()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
         case 0xBE:
             CPU->IRX = MEMORY->PROGRAM_MEM[absy()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
     
         // LDY
 
         case 0xA0:
             CPU->IRY = MEMORY->PROGRAM_MEM[imm()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->IRY);
+            Z_FLAGCHECK(CPU->IRY);
             break;
         case 0xA4:
             CPU->IRY = MEMORY->PROGRAM_MEM[zpg()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->IRY);
+            Z_FLAGCHECK(CPU->IRY);
             break;
         case 0xB4:
             CPU->IRY = MEMORY->PROGRAM_MEM[zpgX()];
+            CPU->PROGRAM_COUNTER += 2;
+            N_FLAGCHECK(CPU->IRY);
+            Z_FLAGCHECK(CPU->IRY);
             break;
         case 0xAC:
             CPU->IRY = MEMORY->PROGRAM_MEM[abso()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->IRY);
+            Z_FLAGCHECK(CPU->IRY);
             break;
         case 0xBC:
             CPU->IRY = MEMORY->PROGRAM_MEM[absx()];
+            CPU->PROGRAM_COUNTER += 3;
+            N_FLAGCHECK(CPU->IRY);
+            Z_FLAGCHECK(CPU->IRY);
             break;
 
         // STA
@@ -749,10 +805,13 @@ void FDC(void) {
         
         case 0x24:
             CPU->ALL_FLAGS |= ( 6 << (6 >> MEMORY->PROGRAM_MEM[zpg()]));
+            CPU->FLAGS.ZERO_FLAG = (MEMORY->PROGRAM_MEM[zpg()] & CPU->ACCUMULATOR);
             break;
         case 0x2c:
             CPU->ALL_FLAGS |= ( 6 << (6 >> MEMORY->PROGRAM_MEM[abso()]));
+            CPU->FLAGS.ZERO_FLAG = (MEMORY->PROGRAM_MEM[zpg()] & CPU->ACCUMULATOR);
             break;
+
         // NOP
         // This instruction does literally nothing :)
 
@@ -768,7 +827,7 @@ void FDC(void) {
              CPU->FLAGS.BREAK_FLAG = 1;
              MEMORY->STACK[CPU->STACK_PTR] = CPU->ALL_FLAGS;
              CPU->STACK_PTR--;
-             puts("BREAK CALLED!\n");
+             puts("BREAK CALLED! NEXT INSTRUCTION");
              STOP = 1;
              break;
         default:

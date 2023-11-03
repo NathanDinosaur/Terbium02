@@ -6,13 +6,14 @@
 int main(void) {
     //initFile(); // segmentation fault 
     CPU->STACK_PTR = 255;
+    CPU->ACCUMULATOR = 0;
 
-    CPU->ACCUMULATOR = 10;
-    CPU->FLAGS.CARRY_FLAG = 1;
-    MEMORY->PROGRAM_MEM[0] = 0x0E;
+    MEMORY->PROGRAM_MEM[60] = 40;
+
+    MEMORY->PROGRAM_MEM[0] = 0xA9;
     MEMORY->PROGRAM_MEM[1] = 5;
-
-    printf("%s\n", "Branch test");
+    MEMORY->PROGRAM_MEM[2] = 0xA6;
+    MEMORY->PROGRAM_MEM[3] = 60;
 
     while(!STOP) {
         FDC();
