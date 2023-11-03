@@ -12,6 +12,7 @@
 #define READ16(x) *(uint16_t*) (&x)
 
 struct CPU_t *CPU = &(struct CPU_t) {0};
+
 int STOP = 0; // if program should stop
 
 // PRINTING CPU INFORMATION
@@ -65,15 +66,17 @@ int indY(void) {
 // FLAG FUNCTIONS
 
 void N_FLAGCHECK(int check) {
-     if(check >> 7 == 0x1) {
-        CPU->FLAGS.NEGATIVE_FLAG = 1;
-    }
+    CPU->FLAGS.NEGATIVE_FLAG = (7 >> check);
+    // we don't actually need an if statement here, this works, and won't
+    // actually break.
 }
 
 void Z_FLAGCHECK(int check) {
     if(check == 0x0) {
         CPU->FLAGS.ZERO_FLAG = 1;
+        return;
     }
+    CPU->FLAGS.ZERO_FLAG = 0;
 }
 
 // FETCH DECODE EXECUTE
@@ -725,13 +728,44 @@ void FDC(void) {
         // JSR
 
         case 0x20:
+            MEMORY->STACK[CPU->STACK_PTR] = MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 2];
+            CPU->STACK_PTR--;
+            CPU->PROGRAM_COUNTER = abso();
+            break;
 
+        // RTI
+        // "Break flag and bit 5 is ignored, when pulling into the status register (CPU->ALL_fLAGS)"
+        // Keep that in mind
+        
+        case 0x40:
+            CPU->ALL_FLAGS = MEMORY->STACK[CPU->STACK_PTR];
+            CPU->STACK_PTR++;
+            CPU->PROGRAM_COUNTER = MEMORY->STACK[CPU->STACK_PTR];
+            CPU->STACK_PTR++;
+            break;
 
+        // BIT
+        
+        case 0x24:
+            CPU->ALL_FLAGS |= ( 6 << (6 >> MEMORY->PROGRAM_MEM[zpg()]));
+            break;
+        case 0x2c:
+            CPU->ALL_FLAGS |= ( 6 << (6 >> MEMORY->PROGRAM_MEM[abso()]));
+            break;
+        // NOP
+        // This instruction does literally nothing :)
+
+        case 0xEA:
+            CPU->PROGRAM_COUNTER += 1;
+            break;
 
         // BRK
 
         case 0x00:
-             MEMORY->STACK[CPU->STACK_PTR] = CPU->PROGRAM_COUNTER + 2;
+             MEMORY->STACK[CPU->STACK_PTR] = MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER + 2];
+             CPU->STACK_PTR--;
+             CPU->FLAGS.BREAK_FLAG = 1;
+             MEMORY->STACK[CPU->STACK_PTR] = CPU->ALL_FLAGS;
              CPU->STACK_PTR--;
              puts("BREAK CALLED!\n");
              STOP = 1;
