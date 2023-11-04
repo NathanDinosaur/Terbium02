@@ -8,12 +8,10 @@ int main(void) {
     CPU->STACK_PTR = 255;
     CPU->ACCUMULATOR = 0;
 
-    MEMORY->PROGRAM_MEM[60] = 40;
-
     MEMORY->PROGRAM_MEM[0] = 0xA9;
     MEMORY->PROGRAM_MEM[1] = 5;
-    MEMORY->PROGRAM_MEM[2] = 0xA6;
-    MEMORY->PROGRAM_MEM[3] = 60;
+
+    // Hello!
 
     while(!STOP) {
         FDC();
