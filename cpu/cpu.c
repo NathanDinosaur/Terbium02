@@ -207,84 +207,114 @@ void FDC(void) {
         
         case 0x85:
             MEMORY->PROGRAM_MEM[zpg()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x95:
             MEMORY->PROGRAM_MEM[zpgX()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x8D:
             MEMORY->PROGRAM_MEM[abso()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x9D:
             MEMORY->PROGRAM_MEM[absx()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x99:
             MEMORY->PROGRAM_MEM[absy()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x81:
             MEMORY->PROGRAM_MEM[Xind()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x91:
             MEMORY->PROGRAM_MEM[indY()] = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         
         // STX
 
         case 0x86:
             MEMORY->PROGRAM_MEM[zpg()] = CPU->IRX;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x96:
             MEMORY->PROGRAM_MEM[zpgX()] = CPU->IRX;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x8E:
             MEMORY->PROGRAM_MEM[abso()] = CPU->IRX;
+            CPU->PROGRAM_COUNTER += 3;
             break;
 
         // STY
         
         case 0x84:
             MEMORY->PROGRAM_MEM[zpg()] = CPU->IRY;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x94:
             MEMORY->PROGRAM_MEM[zpgX()] = CPU->IRY;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x8C:
             MEMORY->PROGRAM_MEM[abso()] = CPU->IRY;
+            CPU->PROGRAM_COUNTER += 3;
             break;
 
         // TAX
 
         case 0xAA:
             CPU->IRX = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 1;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
 
         // TAY
         
         case 0xA8:
             CPU->IRY = CPU->ACCUMULATOR;
+            CPU->PROGRAM_COUNTER += 1;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
+
             break;
 
         // TSX
         
         case 0xBA:
             CPU->IRX = CPU->STACK_PTR;
+            CPU->PROGRAM_COUNTER += 1;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
             break;
 
         // TXA
         
         case 0x8A:
             CPU->ACCUMULATOR = CPU->IRX;
+            CPU->PROGRAM_COUNTER += 1;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
 
         // TXS
 
         case 0x9A:
             CPU->STACK_PTR = CPU->IRX;
+            CPU->PROGRAM_COUNTER += 1;
             break;
 
         // TYA
 
         case 0x98:
             CPU->ACCUMULATOR = CPU->IRY;
+            CPU->PROGRAM_COUNTER += 1;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
             break;
 
         // STACK OPERATIONS (PHA,PHP,PLA, PLP)
@@ -292,73 +322,113 @@ void FDC(void) {
         case 0x48:
             MEMORY->STACK[CPU->STACK_PTR] = CPU->ACCUMULATOR;
             CPU->STACK_PTR--;
+            CPU->PROGRAM_COUNTER += 1;
+
             break;
         case 0x08:
             CPU->FLAGS.IGNORED = 1;
             MEMORY->STACK[CPU->STACK_PTR] = CPU->ALL_FLAGS;
             CPU->STACK_PTR--;
+            CPU->PROGRAM_COUNTER += 1;
+
             break;
         case 0x68:
             CPU->ACCUMULATOR = MEMORY->STACK[CPU->STACK_PTR];
             CPU->STACK_PTR++;
+            CPU->PROGRAM_COUNTER += 1;
+
             break;
         case 0x28:
             MEMORY->STACK[CPU->STACK_PTR] = CPU->ALL_FLAGS;
             CPU->STACK_PTR++;
+            CPU->PROGRAM_COUNTER += 1;
+
             break;
 
         // DEC
 
         case 0xC6:
             MEMORY->PROGRAM_MEM[zpg()]--;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 1;
             break;
         case 0xD6:
             MEMORY->PROGRAM_MEM[zpgX()]--;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            CPU->PROGRAM_COUNTER += 1;
             break;
         case 0xCE:
             MEMORY->PROGRAM_MEM[abso()]--;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            CPU->PROGRAM_COUNTER += 1;
             break;
         case 0xDE:
             MEMORY->PROGRAM_MEM[absx()]--;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            CPU->PROGRAM_COUNTER += 1;
             break;
 
         // DEX
         
         case 0xCA:
             CPU->IRX--;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
+            CPU->PROGRAM_COUNTER += 1;
             break;
 
         // DEY
 
         case 0x88:
             CPU->IRY--;
+            N_FLAGCHECK(CPU->IRX);
+            Z_FLAGCHECK(CPU->IRX);
+            CPU->PROGRAM_COUNTER += 1;
             break;
 
         // INC
         
         case 0xE6:
             MEMORY->PROGRAM_MEM[zpg()]++;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xF6:
             MEMORY->PROGRAM_MEM[zpgX()]++;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xEE:
             MEMORY->PROGRAM_MEM[abso()]++;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0xFE:
             MEMORY->PROGRAM_MEM[absx()]++;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
 
         // INX
 
         case 0xE8:
             CPU->IRX++;
+            CPU->PROGRAM_COUNTER += 1;
             break;
         
         // INY
 
         case 0xC8:
             CPU->IRY++;
+            CPU->PROGRAM_COUNTER += 1;
             break;
 
        // ADC
@@ -813,6 +883,7 @@ void FDC(void) {
             break;
 
         // NOP
+
         // This instruction does literally nothing :)
 
         case 0xEA:
@@ -827,8 +898,9 @@ void FDC(void) {
              CPU->FLAGS.BREAK_FLAG = 1;
              MEMORY->STACK[CPU->STACK_PTR] = CPU->ALL_FLAGS;
              CPU->STACK_PTR--;
-             puts("BREAK CALLED! NEXT INSTRUCTION");
+             puts("BREAK CALLED | PROCESSOR STATUS AT BREAK:");
              STOP = 1;
+             CPU->PROGRAM_COUNTER += 1;
              break;
         default:
             puts("\nERROR! Instruction not valid");

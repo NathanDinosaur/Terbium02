@@ -7,12 +7,10 @@ int main(void) {
     //initFile(); // segmentation fault 
     CPU->STACK_PTR = 255;
     CPU->ACCUMULATOR = 0;
+    CPU->IRX = 5;
 
-    MEMORY->PROGRAM_MEM[0] = 0xA9;
-    MEMORY->PROGRAM_MEM[1] = 5;
-
-    // Hello!
-
+    MEMORY->PROGRAM_MEM[0] = 0xE8;
+    
     while(!STOP) {
         FDC();
         printcpuinfo();
