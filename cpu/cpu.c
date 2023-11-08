@@ -19,7 +19,7 @@ int STOP = 0; // if program should stop
 
 int LastInstruction = 0;
 void printcpuinfo(void) {
-    printf("%x PC| %x SP| %x A| %x X|%x Y| 0x%x LI|\n",
+    printf("0x%x PC| 0x%x SP| 0x%x A| 0x%x X| 0x%x Y| 0x%x LI\n",
             CPU->PROGRAM_COUNTER, CPU->STACK_PTR, CPU->ACCUMULATOR, CPU->IRX, CPU->IRY, LastInstruction);
 }
 
@@ -902,8 +902,10 @@ void FDC(void) {
              STOP = 1;
              CPU->PROGRAM_COUNTER += 1;
              break;
-        default:
-            puts("\nERROR! Instruction not valid");
+        
+        default: // if the processor tries to decode and execute an instruction not defined above.
+            puts("\nERROR! Instruction not valid | PROCESSOR STATUS AT BREAK:");
+            STOP = 1;
             break;
     }
 }
