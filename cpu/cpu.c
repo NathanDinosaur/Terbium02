@@ -11,6 +11,11 @@
 
 #define READ16(x) *(uint16_t*) (&x)
 
+#define MemoryAt(x) MEMORY->PROGRAM_MEM[x] // to be used later. This is much
+                                            // more readable than the alternative "MEMORY->PROGRAM_MEM[]";
+
+//#define PC CPU->PROGRAM_COUNTER;
+
 struct CPU_t *CPU = &(struct CPU_t) {0};
 
 int STOP = 0; // if program should stop
@@ -18,12 +23,17 @@ int STOP = 0; // if program should stop
 // PRINTING CPU INFORMATION
 
 int LastInstruction = 0;
+
 void printcpuinfo(void) {
     printf("0x%x PC| 0x%x SP| 0x%x A| 0x%x X| 0x%x Y| 0x%x LI\n",
             CPU->PROGRAM_COUNTER, CPU->STACK_PTR, CPU->ACCUMULATOR, CPU->IRX, CPU->IRY, LastInstruction);
 }
 
 // ADDRESSING MODES FUNCTIONS
+// these are common ways for instructions to get values corresponding with the instruction
+// like for loading an immediate value into a register. Instead of just copying everything several 
+// times over, we use the function, because they're all more or less the same, and this allows for
+// it to be more readable and flexible.
 
 int imm(void) {
     return CPU->PROGRAM_COUNTER + 1;
@@ -63,13 +73,10 @@ int indY(void) {
     // This works! Don't fuck with it
 }
 
-// FLAG FUNCTIONS
+// FLAG CHECK FUNCTIONS 
 
 void N_FLAGCHECK(int check) {
-    // WE PUT THE NUMBER WE WANT SHIFTED ON THE LEFT. NOT THE RIGHT
     CPU->FLAGS.NEGATIVE_FLAG = (check >> 7);
-    // we don't actually need an if statement here, this works, and won't
-    // actually break.
 }
 
 void Z_FLAGCHECK(int check) {
@@ -79,6 +86,35 @@ void Z_FLAGCHECK(int check) {
     }
     CPU->FLAGS.ZERO_FLAG = 0;
 }
+
+//void C_FLAGCHECK(uint16_t check) {
+    //CPU->FLAGS.CARRY_FLAG = check >> 8;
+//}
+
+/*
+
+void C_FLAGCHECK(uint8_t AOS t, uint8_t x, uint8_t y) {
+    // AOS INDICATES IF ADDITION (1) OR SUBTRACTION (0)
+    if(AOS == 1) {
+        if((x + y) >= 0 && (x + y) <= 255) {
+            CPU->FLAGS.CARRY_FLAG = 0;
+        }
+        else if((x + y) > 255) {
+            CPU->FLAGS.CARRY_FLAG = 1;
+        }
+    return;
+    }
+   // IF SUBTRACTION
+    if((x - y) >= 0 && (x - y) <= 255) {
+        CPU->FLAGS.CARRY_FLAG = 1;
+    }
+    else if((x - y) < 0) {
+        CPU->FLAGS.CARRY_FLAG = 0;
+        
+    }
+}
+
+*/
 
 // FETCH DECODE EXECUTE
 
@@ -436,7 +472,6 @@ void FDC(void) {
         case 0x69:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[imm()];
             CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
             break;
         case 0x65:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[zpg()];

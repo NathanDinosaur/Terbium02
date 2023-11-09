@@ -3,19 +3,24 @@
 
 #include "../loadFile/readBinaryFile.h"
 #include "../cpu/cpu.h"
+#include "../memory/memory.h"
 
 //FILE *fp = fopen("program.bin", "r");
 
 FILE *fp;
-uint8_t *PROGRAM;
 
 void initFile(void) {
-    fp = fopen("program.bin", "r");
+    
+    fp = fopen("ROMs/program.bin", "r");
+    if (fp == NULL) {
+        puts("file invalid");
+        return;
+    }
     fseek(fp, 0, SEEK_END);
     long len = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    PROGRAM = malloc(len);
-    fread(PROGRAM, 1, len, fp);
-
+    //PROGRAM = malloc(len);
+    fread(MEMORY->PROGRAM_MEM, 1, len, fp);
+    fclose(fp);
     // we're going to need to write this to memory, at some point, but I'm not gonna add this yet because there's probably some specific place it needs to be. Writing to PROGRAM_MEMORY.
 }
