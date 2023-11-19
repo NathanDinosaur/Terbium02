@@ -4,17 +4,11 @@
 #include "../memory/memory.h"
 
 // TODO:
-// Go through every instruction, iterate the program counter for their
-// respective amounts for that instruction. Finish the flag checks and also
-// add them for their respective instructions as well- then figure out cycles
-// for each instruction. We need that for timing.
+//while PC is 16 bits, using it to access memory from PROGRAM_MEM like PC + 1
+//evaluates to a number that's greater than the 16 bit limit. We can use
+//(uin8_t) (PC + 1) instead.
 
 #define READ16(x) *(uint16_t*) (&x)
-
-#define MemoryAt(x) MEMORY->PROGRAM_MEM[x] // to be used later. This is much
-                                            // more readable than the alternative "MEMORY->PROGRAM_MEM[]";
-
-//#define PC CPU->PROGRAM_COUNTER;
 
 struct CPU_t *CPU = &(struct CPU_t) {0};
 
@@ -944,6 +938,27 @@ void FDC(void) {
             break;
     }
 }
+
+
+// MISC FUNCTIONS
+
+void ADD(uint8_t x) {
+    uint16_t result = CPU->ACCUMULATOR + x;
+    CPU->FLAGS.CARRY_FLAG = result >> 8;
+    CPU->FLAGS.NEGATIVE_FLAG = result >> 7;
+    CPU->ACCUMULATOR = (uint8_t) result;
+}
+
+void SUB(uint8_t x) {
+    uint16_t result = CPU->ACCUMULATOR - x;
+    CPU->FLAGS.CARRY_FLAG = result >> 8;
+    CPU->FLAGS.NEGATIVE_FLAG = result >> 7;
+    CPU->ACCUMULATOR = (uint8_t) result;
+}
+
+// no no no, this is wrong.
+// Fix it.
+
 
 // for comparing, with the branch instructions
 void comp(uint8_t r, uint8_t o) {
