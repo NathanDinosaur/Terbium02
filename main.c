@@ -4,11 +4,15 @@
 #include "memory/memory.h"
 
 int main(void) {
-    initFile(); 
+    int returnInit = initFile();
+    if(returnInit == 1) {
+        return 1;
+    }
+
     CPU->STACK_PTR = 255;
     CPU->ACCUMULATOR = 0;
 
-    MEMORY->PROGRAM_MEM[0] = 0xE8;
+    // PROCESSOR INITIALIZATION ^
 
     while(!STOP) {
         FDC();

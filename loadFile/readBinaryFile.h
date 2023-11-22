@@ -3,4 +3,4 @@
 #include  <stdio.h>
 
 uint8_t readByteFromFile(void);
-void initFile(void);
+int initFile(void);

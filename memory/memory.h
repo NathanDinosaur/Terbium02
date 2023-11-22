@@ -6,7 +6,7 @@
 // put memory structures and functions here :)
 
 struct MEM_t {
-   uint8_t ZERO_PAGE[256];
+    uint8_t ZERO_PAGE[256];
     uint8_t STACK[256];
     uint8_t PROGRAM_MEM[65536];
 };
