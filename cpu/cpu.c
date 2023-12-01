@@ -66,28 +66,26 @@ int indY(void) {
 
 // FLAG CHECK FUNCTIONS 
 
-void N_FLAGCHECK(int check) {
-    CPU->FLAGS.NEGATIVE_FLAG = (check >> 7);
+/* C evaluates 0 as False (0) and anything else as true (1), we just need to
+ * have it casted as a bool, and I thought this would be faster than the alternative,
+ * which kind of looks dumb, "N_FLAG = (check & 0x80) ? 1 : 0"
+*/
+
+void N_FLAGCHECK(uint8_t check) {
+    CPU->FLAGS.NEGATIVE_FLAG = !!(check & 0x80); // hackiest thing I've ever witnessed
+                                                 // explained under "FLAG CHECK FUNCTIONS"
 }
 
-void Z_FLAGCHECK(int check) {
-    if(check == 0x0) {
-        CPU->FLAGS.ZERO_FLAG = 1;
-        return;
-    }
-    CPU->FLAGS.ZERO_FLAG = 0;
+void Z_FLAGCHECK(uint8_t check) {
+    CPU->FLAGS.ZERO_FLAG = (check == 0x0);
 }
 
-void V_FLAGCHECK(int check) {
-    if(check > 127 || check < -128) {
-        CPU->FLAGS.OVERFLOW_FLAG = 1;
-        return;
-    }
-    CPU->FLAGS.OVERFLOW_FLAG = 0;
+void V_FLAGCHECK(int16_t check) {
+    CPU->FLAGS.OVERFLOW_FLAG = (check > 127 || check < -128);
 }
 
-void C_FLAGCHECK(int check) {
-    CPU->FLAGS.CARRY_FLAG = (check >> 8);
+void C_FLAGCHECK(uint16_t check) {
+    CPU->FLAGS.CARRY_FLAG = !!(check & 0x100);
 }
 
     // FETCH DECODE EXECUTE
@@ -865,6 +863,7 @@ void FDC(void) {
 
         case 0xE0:
             comp(MEMORY->PROGRAM_MEM[imm()], CPU->IRX);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xE4:
             comp(MEMORY->PROGRAM_MEM[zpg()], CPU->IRX);
@@ -877,6 +876,7 @@ void FDC(void) {
 
         case 0xC0:
             comp(MEMORY->PROGRAM_MEM[imm()], CPU->IRY);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xC4:
             comp(MEMORY->PROGRAM_MEM[zpg()], CPU->IRY);

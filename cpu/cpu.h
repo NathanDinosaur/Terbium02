@@ -53,8 +53,10 @@ int indY(void);
 
 // FLAG CHECK FUNCTION DECLERATIONS
 
-void N_FLAGCHECK(int check);
-void Z_FLAGCHECK(int check);
+void N_FLAGCHECK(uint8_t check);
+void Z_FLAGCHECK(uint8_t check);
+void C_FLAGCHECK(uint16_t check);
+void V_FLAGCHECK(int16_t check);
 
 // FETCH, DECODE, EXECUTE
 
