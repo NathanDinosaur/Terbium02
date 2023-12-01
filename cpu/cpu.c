@@ -3,12 +3,10 @@
 #include "cpu.h"
 #include "../memory/memory.h"
 
-// TODO:
+
 //while PC is 16 bits, using it to access memory from PROGRAM_MEM like PC + 1
 //evaluates to a number that's greater than the 16 bit limit. We can use
 //(uin8_t) (PC + 1) instead.
-
-#define READ16(x) *(uint16_t*) (&x)
 
 struct CPU_t *CPU = &(struct CPU_t) {0};
 
@@ -19,8 +17,8 @@ int STOP = 0; // if program should stop
 int LastInstruction = 0;
 
 void printcpuinfo(void) {
-    printf("0x%x PC| 0x%x SP| 0x%x A| 0x%x X| 0x%x Y| 0x%x LI\n",
-            CPU->PROGRAM_COUNTER, CPU->STACK_PTR, CPU->ACCUMULATOR, CPU->IRX, CPU->IRY, LastInstruction);
+    printf("0x%x PC| 0x%x SP| 0x%x A| 0x%x X| 0x%x Y| 0x%x SR| 0x%x LI\n",
+            CPU->PROGRAM_COUNTER, CPU->STACK_PTR, CPU->ACCUMULATOR, CPU->IRX, CPU->IRY, CPU->ALL_FLAGS, LastInstruction);
 }
 
 // ADDRESSING MODES FUNCTIONS
@@ -64,7 +62,6 @@ int Xind(void) {
 int indY(void) {
     uint8_t TA = MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
     return (uint8_t) READ16((MEMORY->PROGRAM_MEM[TA]) + CPU->IRY);
-    // This works! Don't fuck with it
 }
 
 // FLAG CHECK FUNCTIONS 
@@ -81,36 +78,19 @@ void Z_FLAGCHECK(int check) {
     CPU->FLAGS.ZERO_FLAG = 0;
 }
 
-//void C_FLAGCHECK(uint16_t check) {
-    //CPU->FLAGS.CARRY_FLAG = check >> 8;
-//}
-
-/*
-
-void C_FLAGCHECK(uint8_t AOS t, uint8_t x, uint8_t y) {
-    // AOS INDICATES IF ADDITION (1) OR SUBTRACTION (0)
-    if(AOS == 1) {
-        if((x + y) >= 0 && (x + y) <= 255) {
-            CPU->FLAGS.CARRY_FLAG = 0;
-        }
-        else if((x + y) > 255) {
-            CPU->FLAGS.CARRY_FLAG = 1;
-        }
-    return;
+void V_FLAGCHECK(int check) {
+    if(check > 127 || check < -128) {
+        CPU->FLAGS.OVERFLOW_FLAG = 1;
+        return;
     }
-   // IF SUBTRACTION
-    if((x - y) >= 0 && (x - y) <= 255) {
-        CPU->FLAGS.CARRY_FLAG = 1;
-    }
-    else if((x - y) < 0) {
-        CPU->FLAGS.CARRY_FLAG = 0;
-        
-    }
+    CPU->FLAGS.OVERFLOW_FLAG = 0;
 }
 
-*/
+void C_FLAGCHECK(int check) {
+    CPU->FLAGS.CARRY_FLAG = (check >> 8);
+}
 
-// FETCH DECODE EXECUTE
+    // FETCH DECODE EXECUTE
 
 void FDC(void) {
     LastInstruction = MEMORY->PROGRAM_MEM[CPU->PROGRAM_COUNTER];
@@ -464,213 +444,301 @@ void FDC(void) {
        // ADC
 
         case 0x69:
-            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[imm()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
+            ADD(MEMORY->PROGRAM_MEM[imm()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x65:
-            CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[zpg()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            ADD(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x75:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[zpgX()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x6D:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[abso()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x7D:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[absx()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x79:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[absy()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x61:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[Xind()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            CPU->PROGRAM_COUNTER += 2; 
             break;
         case 0x71:
             CPU->ACCUMULATOR += MEMORY->PROGRAM_MEM[indY()];
-            CPU->ACCUMULATOR += CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // SBC
         
         case 0xE9:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[imm()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[imm()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xE5:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[zpg()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xF5:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[zpgX()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xED:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[abso()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[abso()]);
+            CPU->PROGRAM_COUNTER += 3; 
             break;
         case 0xFD:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[absx()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[absx()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0xF9:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[absy()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[absy()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0xE1:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[Xind()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[Xind()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0xF1:
-            CPU->ACCUMULATOR -= MEMORY->PROGRAM_MEM[indY()];
-            CPU->ACCUMULATOR -= CPU->FLAGS.CARRY_FLAG;
-            CPU->FLAGS.CARRY_FLAG = 0;
+            SUB(MEMORY->PROGRAM_MEM[indY()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // AND
 
         case 0x29:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[imm()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x25:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[zpg()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x35:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[zpgX()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x2D:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[abso()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x3D:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[absx()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x39:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[absy()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x21:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[Xind()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x31:
             CPU->ACCUMULATOR &= MEMORY->PROGRAM_MEM[indY()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // EOR
 
         case 0x49:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[imm()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
+            
             break;
         case 0x45:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[zpg()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x55:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[zpgX()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x4D:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[abso()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x5D:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[absx()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x59:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[absy()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x41:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[Xind()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x51:
             CPU->ACCUMULATOR ^= MEMORY->PROGRAM_MEM[indY()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // ORA    
 
         case 0x09:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[imm()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x05:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[zpg()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x15:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[zpgX()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x0D:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[abso()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x1D:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[absx()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x19:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[absy()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
         case 0x01:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[Xind()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
         case 0x11:
             CPU->ACCUMULATOR |= MEMORY->PROGRAM_MEM[indY()];
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
        // ASL
 
        case 0x0A:
-            CPU->FLAGS.CARRY_FLAG = CPU->ACCUMULATOR >> 7;
-            CPU->ACCUMULATOR >>= 1;
+            C_FLAGCHECK(CPU->ACCUMULATOR << 1);
+            CPU->ACCUMULATOR <<= 1;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 1;
             break;
        case 0x06:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] >> 7;
-            MEMORY->PROGRAM_MEM[zpg()] >>= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()] << 1);
+            MEMORY->PROGRAM_MEM[zpg()] <<= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0x16:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpgX()] >> 7;
-            MEMORY->PROGRAM_MEM[zpgX()] >>= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()] << 1);
+            MEMORY->PROGRAM_MEM[zpgX()] <<= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0x0E:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[abso()] >> 7;
-            MEMORY->PROGRAM_MEM[abso()] >>= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()] << 1);
+            MEMORY->PROGRAM_MEM[abso()] <<= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
        case 0x1E:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[absx()] >> 7;
-            MEMORY->PROGRAM_MEM[absx()] >>= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()] << 1);
+            MEMORY->PROGRAM_MEM[absx()] <<= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
 
        // LSR
 
        case 0x4A:
-            CPU->FLAGS.CARRY_FLAG = CPU->ACCUMULATOR << 7;
-            CPU->ACCUMULATOR <<= 1;
+            C_FLAGCHECK(CPU->ACCUMULATOR >> 1);
+            CPU->ACCUMULATOR >>= 1;
+            N_FLAGCHECK(CPU->ACCUMULATOR);
+            Z_FLAGCHECK(CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 1;
             break;
        case 0x46:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
-            MEMORY->PROGRAM_MEM[zpg()] <<= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()] >> 1);
+            MEMORY->PROGRAM_MEM[zpg()] >>= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpg()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0x56:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
-            MEMORY->PROGRAM_MEM[zpgX()] <<= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()] >> 1);
+            MEMORY->PROGRAM_MEM[zpgX()] >>= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[zpgX()]);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0x4E:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
-            MEMORY->PROGRAM_MEM[abso()] <<= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()] >> 1);
+            MEMORY->PROGRAM_MEM[abso()] >>= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[abso()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
        case 0x5E:
-            CPU->FLAGS.CARRY_FLAG = MEMORY->PROGRAM_MEM[zpg()] << 7;
-            MEMORY->PROGRAM_MEM[absx()] <<= 1;
+            C_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()] >> 1);
+            MEMORY->PROGRAM_MEM[absx()] >>= 1;
+            N_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            Z_FLAGCHECK(MEMORY->PROGRAM_MEM[absx()]);
+            CPU->PROGRAM_COUNTER += 3;
             break;
 
         // ROL
@@ -749,6 +817,7 @@ void FDC(void) {
 
        case 0x38:
             CPU->FLAGS.CARRY_FLAG = 1;
+            CPU->PROGRAM_COUNTER += 1;
             break;
        case 0xF8:
             CPU->FLAGS.DECIMAL_FLAG = 1;
@@ -759,29 +828,37 @@ void FDC(void) {
 
        // CMP
        
-       case 0xc9:
+       case 0xC9:
             comp(MEMORY->PROGRAM_MEM[imm()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
-       case 0xc5:
+       case 0xC5:
             comp(MEMORY->PROGRAM_MEM[zpg()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0xD5:
             comp(MEMORY->PROGRAM_MEM[zpgX()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0xCD:
             comp(MEMORY->PROGRAM_MEM[abso()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
        case 0xDD:
             comp(MEMORY->PROGRAM_MEM[absx()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
        case 0xD9:
             comp(MEMORY->PROGRAM_MEM[absy()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 3;
             break;
        case 0xC1:
             comp(MEMORY->PROGRAM_MEM[Xind()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
        case 0xD1:
             comp(MEMORY->PROGRAM_MEM[indY()], CPU->ACCUMULATOR);
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // CPX
@@ -813,7 +890,9 @@ void FDC(void) {
         case 0x90:
             if(!CPU->FLAGS.CARRY_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                break;
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // BCS
@@ -821,7 +900,9 @@ void FDC(void) {
         case 0xB0:
             if(CPU->FLAGS.CARRY_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                break;
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // BEQ
@@ -830,6 +911,7 @@ void FDC(void) {
             if(CPU->FLAGS.ZERO_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         //  BMI
@@ -838,6 +920,7 @@ void FDC(void) {
             if(CPU->FLAGS.NEGATIVE_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // BNE
@@ -846,6 +929,7 @@ void FDC(void) {
             if(!CPU->FLAGS.ZERO_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // BPL
@@ -854,6 +938,7 @@ void FDC(void) {
             if(!CPU->FLAGS.NEGATIVE_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // BVC
@@ -862,6 +947,7 @@ void FDC(void) {
             if(!CPU->FLAGS.OVERFLOW_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
 
         // BVS
@@ -870,6 +956,7 @@ void FDC(void) {
             if(CPU->FLAGS.OVERFLOW_FLAG) {
                 CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
             }
+            CPU->PROGRAM_COUNTER += 2;
             break;
         
         // JMP
@@ -944,9 +1031,11 @@ void FDC(void) {
 
 void ADD(uint8_t x) {
     uint16_t result = (CPU->ACCUMULATOR + x) + CPU->FLAGS.CARRY_FLAG;
-    CPU->FLAGS.CARRY_FLAG = result >> 8;
-    CPU->FLAGS.NEGATIVE_FLAG = result >> 7;
-    CPU->ACCUMULATOR = (uint8_t) result;
+    C_FLAGCHECK(result);
+    V_FLAGCHECK(result);
+    N_FLAGCHECK(result);
+    Z_FLAGCHECK(result);
+    CPU->ACCUMULATOR = result & 0xFF;
 }
 
 void SUB(uint8_t x) {
@@ -954,27 +1043,11 @@ void SUB(uint8_t x) {
     ADD(x);
 }
 
-// no no no, this is wrong.
-// Fix it.
-
-
 // for comparing, with the branch instructions
-void comp(uint8_t r, uint8_t o) {
-    uint8_t sr = r - o;
-    if(r < o) {
-        CPU->FLAGS.NEGATIVE_FLAG = sr << 7;
-        CPU->FLAGS.ZERO_FLAG = 0;
-        CPU->FLAGS.CARRY_FLAG = 0;
-    }
-    else if(r == 0) {
-        CPU->FLAGS.ZERO_FLAG = 1;
-        CPU->FLAGS.CARRY_FLAG = 1;
-        CPU->FLAGS.NEGATIVE_FLAG = 0;
-    }
-    else if(r > o) {
-        CPU->FLAGS.ZERO_FLAG = 0;
-        CPU->FLAGS.CARRY_FLAG = 1;
-        CPU->FLAGS.NEGATIVE_FLAG = sr << 7;
-    }
+void comp(uint8_t o, uint8_t r) {
+    uint16_t result = r - o;
+    N_FLAGCHECK(result);
+    Z_FLAGCHECK(result);
+    C_FLAGCHECK(result);
 }
 

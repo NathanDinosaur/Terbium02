@@ -28,6 +28,8 @@ struct CPU_t {
     };
 };
 
+#define READ16(x) *(uint16_t*) (&x)
+
 extern int STOP;
 
 extern struct CPU_t *CPU; // using extern with structs in C is awkward, so instead
@@ -72,5 +74,8 @@ void PLP(void);
 
 void comp(uint8_t r, uint8_t o); 
 
+// MISC
+void ADD(uint8_t x);
+void SUB(uint8_t x);
 
 #endif

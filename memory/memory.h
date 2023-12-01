@@ -2,7 +2,6 @@
 #ifndef MEM_H
 #define MEM_H
 
-
 // put memory structures and functions here :)
 
 struct MEM_t {
