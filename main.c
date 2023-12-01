@@ -15,7 +15,7 @@ int main(void) {
 
     // PROCESSOR INITIALIZATION ^
 
-    puts("CPU INFO AT START:");
+    puts("PROCESSOR STATUS AT START:");
     printcpuinfo();
 
     while(!STOP) {

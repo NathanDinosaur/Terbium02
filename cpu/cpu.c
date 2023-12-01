@@ -17,7 +17,7 @@ int STOP = 0; // if program should stop
 int LastInstruction = 0;
 
 void printcpuinfo(void) {
-    printf("0x%x PC| 0x%x SP| 0x%x A| 0x%x X| 0x%x Y| 0x%x SR| 0x%x LI\n",
+    printf("0x%X PC| 0x%X SP| 0x%X A| 0x%X X| 0x%X Y| 0x%X SR| 0x%X LI\n",
             CPU->PROGRAM_COUNTER, CPU->STACK_PTR, CPU->ACCUMULATOR, CPU->IRX, CPU->IRY, CPU->ALL_FLAGS, LastInstruction);
 }
 
