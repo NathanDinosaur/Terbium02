@@ -5,14 +5,18 @@
 
 int main(void) {
     int returnInit = initFile();
+
     if(returnInit == 1) {
         return 1;
     }
 
-    CPU->STACK_PTR = 255;
-    CPU->ACCUMULATOR = 0;
+    CPU->STACK_PTR = 0xFF;
+    CPU->ALL_FLAGS = 0x36; // the default values of the status register.
 
     // PROCESSOR INITIALIZATION ^
+
+    puts("CPU INFO AT START:");
+    printcpuinfo();
 
     while(!STOP) {
         FDC();
