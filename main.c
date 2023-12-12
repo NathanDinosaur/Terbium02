@@ -11,6 +11,7 @@ int main(void) {
     // PROCESSOR INITIALIZATION ^
 
     while(!STOP) {
+    FDC();
     printcpuinfo();
     }
     return 0;
