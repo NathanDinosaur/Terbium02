@@ -28,11 +28,11 @@ void printcpuinfo(void) {
 // it to be more readable and flexible.
 
 int imm(void) {
-    return (uint8_t) (CPU->PROGRAM_COUNTER + 1);
+    return (uint16_t) (CPU->PROGRAM_COUNTER + 1);
 }
 
 int zpg(void) {
-    return MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+    return MEMORY->PROGRAM_MEM[(uint16_t) (CPU->PROGRAM_COUNTER + 1)];
 }
 
 int zpgX(void) {
@@ -44,7 +44,7 @@ int zpgY(void) {
 }
 
 int abso(void) {
-    return READ16(MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)]);
+    return READ16(MEMORY->PROGRAM_MEM[(uint16_t) (CPU->PROGRAM_COUNTER + 1)]);
 }
 
 int absx(void) {
@@ -59,6 +59,7 @@ int Xind(void) {
     uint8_t x = CPU->IRX + MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
     return (READ16(MEMORY->PROGRAM_MEM[x]));
 }
+
 int indY(void) {
     uint8_t TA = MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
     return (uint8_t) READ16((MEMORY->PROGRAM_MEM[TA]) + CPU->IRY);
@@ -889,7 +890,7 @@ void FDC(void) {
     
         case 0x90:
             if(!CPU->FLAGS.CARRY_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
                 break;
             }
             CPU->PROGRAM_COUNTER += 2;
@@ -899,7 +900,7 @@ void FDC(void) {
         
         case 0xB0:
             if(CPU->FLAGS.CARRY_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
                 break;
             }
             CPU->PROGRAM_COUNTER += 2;
@@ -909,7 +910,7 @@ void FDC(void) {
         
         case 0xF0:
             if(CPU->FLAGS.ZERO_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
             }
             CPU->PROGRAM_COUNTER += 2;
             break;
@@ -918,7 +919,7 @@ void FDC(void) {
 
         case 0x30:
             if(CPU->FLAGS.NEGATIVE_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
             }
             CPU->PROGRAM_COUNTER += 2;
             break;
@@ -927,7 +928,7 @@ void FDC(void) {
 
         case 0xD0:
             if(!CPU->FLAGS.ZERO_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
             }
             CPU->PROGRAM_COUNTER += 2;
             break;
@@ -936,7 +937,7 @@ void FDC(void) {
 
         case 0x10:
             if(!CPU->FLAGS.NEGATIVE_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
             }
             CPU->PROGRAM_COUNTER += 2;
             break;
@@ -945,7 +946,7 @@ void FDC(void) {
 
         case 0x50:
             if(!CPU->FLAGS.OVERFLOW_FLAG) {
-                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[(uint8_t) (CPU->PROGRAM_COUNTER + 1)];
+                CPU->PROGRAM_COUNTER += MEMORY->PROGRAM_MEM[imm()];
             }
             CPU->PROGRAM_COUNTER += 2;
             break;

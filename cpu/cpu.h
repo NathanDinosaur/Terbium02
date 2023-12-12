@@ -28,7 +28,13 @@ struct CPU_t {
     };
 };
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define READ16(x) *(uint16_t*) (&x)
+
+#else
+#define READ16(x) // FINISH IMPLEMENTATION!!!! 
+// This is terrible
+#endif
 
 extern int STOP;
 
@@ -61,16 +67,6 @@ void V_FLAGCHECK(int16_t check);
 // FETCH, DECODE, EXECUTE
 
 void FDC(void);
-
-// STACK INSTRUCTIONS (:
-
-void PHA(void);
-
-void PHP(void);
-
-void PLA(void);
-
-void PLP(void);
 
 // CMP
 
