@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#include <byteswap.h>
 #include "../memory/memory.h"
 
 #ifndef CPU_H
@@ -31,9 +31,11 @@ struct CPU_t {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define READ16(x) *(uint16_t*) (&x)
 
-#else
-#define READ16(x) // FINISH IMPLEMENTATION!!!! 
-// This is terrible
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define READ16(x) bswap_16(*(uint16_t*) (&x))
+
+else
+#error CANNOT DETERMINE MACHINE ENDIANESS
 #endif
 
 extern int STOP;
